@@ -1,0 +1,17 @@
+{
+  "name": "couch-replication",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "start": "index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "command-line-args": "^4.0.2",
+    "nano": "^6.2.0"
+  }
+}
