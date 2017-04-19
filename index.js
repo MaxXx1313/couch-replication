@@ -65,7 +65,7 @@ switch(options.operation){
     break;
 
   default:
-    console.warn('unknown operation:', options.operation);
+    console.warn('Unknown operation:', options.operation);
 }
 
 
@@ -84,12 +84,12 @@ function operationList(options){
 
 
 function dbList(options){
-  var host = options.src || options.replicator;
-  assert.ok(host,  'No value for: replicator. Use -s|--src to set it');
+  var source = options.src || options.replicator;
+  assert.ok(source,  'No value for: source. Use -s|--src to set it');
   assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
 
   Promise.resolve().then(()=>{
-    let r = new Replicator(host, options.prefix);
+    let r = new Replicator(source, options.prefix);
     return r.dbList();
   })
   .then(list=>{
@@ -100,11 +100,16 @@ function dbList(options){
 
 
 function replicate(options){
-  assert.ok(options.src||options.replicator);
-  assert.ok(options.target);
+  var replicator = options.replicator || options.src;
+  var source = options.src || options.replicator;
+
+  assert.ok(replicator,  'No value for: replicator. Use -r|--replicator to set it');
+  assert.ok(source,  'No value for: source. Use -s|--src to set it');
+  assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+
   Promise.resolve().then(()=>{
-    let r = new Replicator(options.replicator||options.src, options.prefix);
-    return r.replicate();
+    let r = new Replicator(replicator, options.prefix);
+    return r.replicate(source, options.target);
   })
   .then(list=>{
     console.log('Active replications: \n' + prettyFormat(list, ['replication_id', 'source', 'target',  'continuous', 'progress', 'updated_on']) );
