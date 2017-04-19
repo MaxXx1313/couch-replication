@@ -112,6 +112,19 @@ describe('Replicator', function(){
 
     });
 
+
+    it('_getProgress', function(){
+
+      let from = 'http://admin:*****@172.16.16.84:5984/test_suite_db/';
+      let to = 'http://admin:*****@172.16.16.84:5984/test_suite_replicated/';
+
+      let r = new Replicator(host, 'test_');
+      r._getProgress(from, to).then(progress=>{
+        assert.equal(progress, 100); // replication is done
+      });
+
+    });
+
     describe('replicate resume #1', function(){
 
       it('do stuff', function(){
@@ -216,6 +229,31 @@ describe('replacePrefix', function(){
       assert.throws(function(){
         replacePrefix('my-test-1', 'y-', 'e-');
       });
+    });
+
+});
+
+describe('__matchUrl', function(){
+
+    // make sure to run after 'replicate continuous'
+    it('simple', function(){
+
+      let r = new Replicator(host, 'my-test-');
+
+      let testData = [
+        // 0 - scrubbed
+        // 1 - normal
+        // 2 - is the same (boolean)
+        [
+          'http://admin:*****@172.16.16.84:5984/current-develop_ffa_ext_task/',
+          'http://admin:admin@172.16.16.84:5984/current-develop_ffa_ext_task',
+          true
+        ]
+      ];
+      testData.forEach(data=>{
+        assert.equal(r.__matchUrl(data[0], data[1]), data[2]);
+      });
+
     });
 
 });

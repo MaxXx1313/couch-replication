@@ -6,6 +6,11 @@ const prettyFormat      = require('./lib/cli-tools.js').prettyFormat;
 const prettyFormatArray = require('./lib/cli-tools.js').prettyFormatArray;
 const Replicator = require('./lib/replicator.js').Replicator;
 
+const singleLog = require('single-line-log').stdout;
+
+const LopConsole = require('./lib/LopConsole');
+const logger = new LopConsole();
+
 const HOST_DEFAULT = 'http://localhost:5984';
 
 const optionDefinitions = [
@@ -76,7 +81,7 @@ switch(options.operation){
  *
  */
 function operationList(options){
-  let replicator = options.replicator || HOST_DEFAULT;
+  let replicator = options.replicator || options.src || HOST_DEFAULT;
   assert.ok(replicator,  'No value for: replicator. Use -r|--replicator to set it');
   assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
 
@@ -124,7 +129,31 @@ function replicate(options){
 
   Promise.resolve().then(()=>{
     let r = new Replicator(replicator, options.prefix);
-    return r.replicate(source, options.target, {newprefix: options.newprefix, after: options.after} );
+
+    let lastOperation = '...';
+    r.on('opStart', op=>{
+      lastOperation = '  ' + op;
+      // console.log('opStart', op);
+      logger.logLOP(lastOperation + '  ...');
+    });
+    r.on('opProgress', progress=>{
+      // console.log('opProgress', progress);
+      logger.logLOP(lastOperation + '  ' + progress +' %');
+    });
+    r.on('opEnd', status=>{
+      // console.log('opEnd', status);
+      // logger.logLOP('');
+      logger.log('    ' + lastOperation + '  ' + status);
+      lastOperation = null;
+    });
+
+
+    logger.startLOP();
+    return r.replicate(source, options.target, {newprefix: options.newprefix, after: options.after} )
+    .then(()=>{
+      logger.stopLOP();
+      console.log('All done! Elapsed: %s sec', logger.elapsedLOP() );
+    });
   })
   .then(list=>{
     console.log('All done!');

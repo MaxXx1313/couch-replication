@@ -13,6 +13,7 @@
   "dependencies": {
     "command-line-args": "^4.0.2",
     "nano": "^6.2.0",
-    "nano-promises": "^1.2.0"
+    "nano-promises": "^1.2.0",
+    "single-line-log": "^1.1.2"
   }
 }
