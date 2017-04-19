@@ -11,6 +11,7 @@ let dbList = [
   'my-test-4',
   'my-nottest-5',
 ];
+
 let host = 'http://admin:admin@172.16.16.84:5984';
 before(function(){
   // create some dbs
@@ -78,7 +79,7 @@ describe('Replicator', function(){
       });
     });
 
-    it('replicate shot', function(){
+    it('replicate shot absolute', function(){
 
       let from = host + '/test_suite_db';
       let to = host + '/test_suite_replicated';
@@ -87,7 +88,21 @@ describe('Replicator', function(){
 
       return r.replicate(from, to, {create_target:true})
         .then(result=>{
-          assert.equal(result[0].ok, true);
+          assert.equal(result.ok, true);
+        });
+
+    });
+
+    it('replicate shot relative', function(){
+
+      let from = 'test_suite_db';
+      let to = 'test_suite_replicated';
+
+      let r = new Replicator(host, 'my-test-');
+
+      return r.replicate(from, to, {create_target:true})
+        .then(result=>{
+          assert.equal(result.ok, true);
         });
 
     });
@@ -101,8 +116,8 @@ describe('Replicator', function(){
       r.replicate(from, to, {create_target:true, continuous:true})
         .then(result=>{
           // console.log(err, result);
-          assert.equal(result[0].ok, true);
-          assert.equal(!!result[0]._local_id, true);
+          assert.equal(result.ok, true);
+          assert.equal(!!result._local_id, true);
         });
 
     });
