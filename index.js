@@ -72,6 +72,10 @@ switch(options.operation){
     replicate(options);
     break;
 
+  case 'delete':
+    removeAll(options);
+    break;
+
   default:
     console.warn('Unknown operation:', options.operation);
 }
@@ -167,9 +171,10 @@ function removeAll(options){
   var target = options.target || options.replicator || options.src || HOST_DEFAULT;
 
   assert.ok(target,  'No value for: target. Use -t|--target to set it');
+  console.log('YOU HAVE 5 SECOND TO DISCARD REMOVING!');
+  console.log('Press  Ctrl + C  to discard!');
 
-
-  Promise.resolve().then(()=>{
+  timeout(5000).then(()=>{
     let r = new Replicator(target, options.prefix);
 
     r.on('opStart', op=>{
@@ -180,10 +185,13 @@ function removeAll(options){
       console.log(status);
     });
 
-
     return r.removeAll();
   })
   .then(list=>{
     console.log('All done!');
   });
+}
+
+function timeout(ms){
+  return new Promise(resolve=>{ setTimeout(resolve, ms);})
 }
