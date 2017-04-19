@@ -61,24 +61,6 @@ describe('Replicator', function(){
       });
     });
 
-
-    it('replicationList', function(){
-      let r = new Replicator(host, 'my-test-');
-
-      let expected = [
-        'my-test-1',
-        'my-test-2',
-        'my-test-4',
-      ];
-
-      return r.replicationList().then(list=>{
-        console.log(list);
-
-        // assert.deepEqual(list, expected);
-        // TODO
-      });
-    });
-
     it('replicate shot absolute', function(){
 
       let from = host + '/test_suite_db';
@@ -119,7 +101,26 @@ describe('Replicator', function(){
           assert.equal(result.ok, true);
           assert.equal(!!result._local_id, true);
         });
-
     });
+
+
+    // make sure to run after 'replicate continuous'
+    it('replicationList', function(){
+      let r = new Replicator(host, 'my-test-');
+
+      let expected = [
+        'my-test-1',
+        'my-test-2',
+        'my-test-4',
+      ];
+
+      return r.replicationList().then(list=>{
+        console.log('replicationList stub', list);
+
+        // assert.deepEqual(list, expected);
+        // TODO
+      });
+    });
+
 
 });
