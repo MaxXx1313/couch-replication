@@ -69,12 +69,31 @@ describe('Replicator', function(){
         ];
 
 
+        let log = [];
+        function logPush(str){
+          log.push(str);
+        }
+
+        let logExpected = [
+          "Fetching db list",    "Done",
+          "Replicate my-test-1", "Success",
+          "Replicate my-test-2", "Success",
+          "Replicate my-test-4", "Success"
+        ];
+
+
+        r.on('opStart', logPush);
+        // r.on('opProgress', logPush);
+        r.on('opEnd', logPush);
+
+
         return r.replicate(host, host, {newprefix: 'my-replica-'})
           .then(()=>{
             let r2 = new Replicator(host, 'my-replica-');
             return r2.dbList();
           }).then(list=>{
             assert.deepEqual(list, expected);
+            assert.deepEqual(log, logExpected);
           });
       });
 
