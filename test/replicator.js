@@ -75,7 +75,7 @@ describe('Replicator', function(){
         }
 
         let logExpected = [
-          "Fetching db list",    "Done",
+          "Fetch db list",    "Done",
           "Replicate my-test-1", "Success",
           "Replicate my-test-2", "Success",
           "Replicate my-test-4", "Success"
@@ -89,6 +89,11 @@ describe('Replicator', function(){
 
         return r.replicate(host, host, {newprefix: 'my-replica-'})
           .then(()=>{
+
+            r.off('opStart', logPush);
+            // r.off('opProgress', logPush);
+            r.off('opEnd', logPush);
+
             let r2 = new Replicator(host, 'my-replica-');
             return r2.dbList();
           }).then(list=>{
@@ -147,18 +152,50 @@ describe('Replicator', function(){
 
       });
 
-      // cleanup
-      afterEach(function(){
-        let replicaList = [
-          'my-replica-1',
-          'my-replica-2',
-          'my-replica-4',
+      // cleanup & test
+      it('removeAll', function(){
+
+        let log = [];
+        function logPush(str){
+          log.push(str);
+        }
+
+        let logExpected = [
+          'Fetch db list',          'Done',
+          'Remove my-replica-2',       'Removed',
+          'Remove my-replica-4',       'Removed'
         ];
-        // remove dbs
-        return Promise.all(replicaList.map(dbName=>{
-          return nano(host).db.destroy(dbName).catch(e=>e);
-        }));
+
+
+
+        let r = new Replicator(host, 'my-replica-');
+        r.on('opStart', logPush);
+        r.on('opEnd', logPush);
+
+        return r.removeAll().then(()=>{
+
+          r.off('opStart', logPush);
+          r.off('opEnd', logPush);
+
+          return r.dbList();
+        }).then(list=>{
+          assert.deepEqual(list, []);
+          assert.deepEqual(log, logExpected);
+        });
+
       });
+
+      // afterEach(function(){
+      //   let replicaList = [
+      //     'my-replica-1',
+      //     'my-replica-2',
+      //     'my-replica-4',
+      //   ];
+      //   // remove dbs
+      //   return Promise.all(replicaList.map(dbName=>{
+      //     return nano(host).db.destroy(dbName).catch(e=>e);
+      //   }));
+      // });
 
     });
 
@@ -217,6 +254,7 @@ describe('Replicator', function(){
         // TODO
       });
     });
+
 
 });
 

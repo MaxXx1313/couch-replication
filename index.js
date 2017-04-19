@@ -152,8 +152,36 @@ function replicate(options){
     return r.replicate(source, options.target, {newprefix: options.newprefix, after: options.after} )
     .then(()=>{
       logger.stopLOP();
-      console.log('All done! Elapsed: %s sec', logger.elapsedLOP() );
+      console.log('All done! Elapsed: %s ms', logger.elapsedLOP() );
     });
+  });
+}
+
+
+
+
+/**
+ *
+ */
+function removeAll(options){
+  var target = options.target || options.replicator || options.src || HOST_DEFAULT;
+
+  assert.ok(target,  'No value for: target. Use -t|--target to set it');
+
+
+  Promise.resolve().then(()=>{
+    let r = new Replicator(target, options.prefix);
+
+    r.on('opStart', op=>{
+      process.stdout.write(' ' + op+ '...');
+    });
+    r.on('opEnd', status=>{
+      // console.log('opEnd', status);
+      console.log(status);
+    });
+
+
+    return r.removeAll();
   })
   .then(list=>{
     console.log('All done!');
