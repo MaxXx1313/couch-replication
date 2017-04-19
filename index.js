@@ -85,7 +85,7 @@ switch(options.operation){
  *
  */
 function operationList(options){
-  let replicator = options.replicator || options.src || HOST_DEFAULT;
+  let replicator = options.replicator || options.src || options.target || HOST_DEFAULT;
   assert.ok(replicator,  'No value for: replicator. Use -r|--replicator to set it');
   assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
 
@@ -103,7 +103,7 @@ function operationList(options){
  *
  */
 function dbList(options){
-  var source = options.src || options.replicator || HOST_DEFAULT;
+  var source = options.src || options.replicator || options.target || HOST_DEFAULT;
   assert.ok(source,  'No value for: source. Use -s|--src to set it');
   assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
 
@@ -192,6 +192,7 @@ function removeAll(options){
   });
 }
 
+
 function timeout(ms){
-  return new Promise(resolve=>{ setTimeout(resolve, ms);})
+  return new Promise(resolve=>{ setTimeout(resolve, ms);});
 }

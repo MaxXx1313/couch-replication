@@ -161,9 +161,9 @@ describe('Replicator', function(){
         }
 
         let logExpected = [
-          'Fetch db list',          'Done',
-          'Remove my-replica-4',       'Removed',
-          'Remove my-replica-2',       'Removed'
+          'Fetch db list',        'Done',
+          'Remove my-replica-4',  'Removed',
+          'Remove my-replica-2',  'Removed'
         ];
 
 
