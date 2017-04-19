@@ -6,14 +6,16 @@ const prettyFormat      = require('./lib/cli-tools.js').prettyFormat;
 const prettyFormatArray = require('./lib/cli-tools.js').prettyFormatArray;
 const Replicator = require('./lib/replicator.js').Replicator;
 
+const HOST_DEFAULT = 'http://localhost:5984';
+
 const optionDefinitions = [
   { name: 'operation', type: String, defaultOption:true },
   { name: 'help',    alias: "h", type: Boolean },
   { name: 'prefix',  alias: 'p', type: String },
   { name: 'src',     alias: 's', type: String },  // url
   { name: 'target',  alias: 't', type: String },  // url
-  { name: 'replicator',  alias: 'r', type: String,
-    defaultValue :'http://localhost:5984' }  // url
+  { name: 'newprefix',  type: String },  // url
+  { name: 'replicator',  alias: 'r', type: String }  // url
 ];
 
 const options = commandLineArgs(optionDefinitions);
@@ -70,11 +72,12 @@ switch(options.operation){
 
 
 function operationList(options){
-  assert.ok(options.replicator,  'No value for: replicator. Use -r|--replicator to set it');
+  let replicator = options.replicator || HOST_DEFAULT;
+  assert.ok(replicator,  'No value for: replicator. Use -r|--replicator to set it');
   assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
 
   Promise.resolve().then(()=>{
-    let r = new Replicator(options.replicator, options.prefix);
+    let r = new Replicator(replicator, options.prefix);
     return r.replicationList();
   })
   .then(list=>{
@@ -84,7 +87,7 @@ function operationList(options){
 
 
 function dbList(options){
-  var source = options.src || options.replicator;
+  var source = options.src || options.replicator || HOST_DEFAULT;
   assert.ok(source,  'No value for: source. Use -s|--src to set it');
   assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
 
@@ -100,18 +103,21 @@ function dbList(options){
 
 
 function replicate(options){
-  var replicator = options.replicator || options.src;
-  var source = options.src || options.replicator;
+  var replicator = options.replicator || options.src || HOST_DEFAULT;
+  var source = options.src || options.replicator || HOST_DEFAULT;
 
   assert.ok(replicator,  'No value for: replicator. Use -r|--replicator to set it');
   assert.ok(source,  'No value for: source. Use -s|--src to set it');
   assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+  if(!options.newprefix ||  options.newprefix == options.prefix){
+    assert.notEqual(source, options.target,  'Source and target must be different!');
+  }
 
   Promise.resolve().then(()=>{
-    let r = new Replicator(replicator, options.prefix);
+    let r = new Replicator(replicator, options.prefix, options.newprefix);
     return r.replicate(source, options.target);
   })
   .then(list=>{
-    console.log('Active replications: \n' + prettyFormat(list, ['replication_id', 'source', 'target',  'continuous', 'progress', 'updated_on']) );
+    console.log('All done!');
   });
 }

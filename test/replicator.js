@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
 const assert = require('assert');
 const Replicator = require('../lib/replicator.js').Replicator;
+const replacePrefix = require('../lib/replicator.js').replacePrefix;
 const nano = require('nano');
 
 
@@ -61,51 +62,31 @@ describe('Replicator', function(){
       });
     });
 
-    it('replicate shot absolute', function(){
 
-      let from = host + '/test_suite_db';
-      let to = host + '/test_suite_replicated';
+    it('replicate', function(){
 
-      let r = new Replicator(host, 'my-test-');
+      let r = new Replicator(host, 'my-test-', 'my-replica-');
 
-      return r.replicate(from, to, {create_target:true})
-        .then(result=>{
-          assert.equal(result.ok, true);
+      let expected = [
+        'my-replica-1',
+        'my-replica-2',
+        'my-replica-4',
+      ];
+
+
+      return r.replicate(host, host)
+        .then(()=>{
+          let r2 = new Replicator(host, 'my-replica-');
+          return r2.dbList();
+        }).then(list=>{
+          assert.deepEqual(list, expected);
         });
 
-    });
-
-    it('replicate shot relative', function(){
-
-      let from = 'test_suite_db';
-      let to = 'test_suite_replicated';
-
-      let r = new Replicator(host, 'my-test-');
-
-      return r.replicate(from, to, {create_target:true})
-        .then(result=>{
-          assert.equal(result.ok, true);
-        });
-
-    });
-
-
-    it('replicate continuous', function(){
-      let from = host + '/test_suite_db';
-      let to = host + '/test_suite_replicated';
-
-      let r = new Replicator(host, 'my-test-');
-      r.replicate(from, to, {create_target:true, continuous:true})
-        .then(result=>{
-          // console.log(err, result);
-          assert.equal(result.ok, true);
-          assert.equal(!!result._local_id, true);
-        });
     });
 
 
     // make sure to run after 'replicate continuous'
-    it('replicationList', function(){
+    it.skip('replicationList', function(){
       let r = new Replicator(host, 'my-test-');
 
       let expected = [
@@ -122,5 +103,17 @@ describe('Replicator', function(){
       });
     });
 
+});
+
+describe('replacePrefix', function(){
+
+    // make sure to run after 'replicate continuous'
+    it('simple', function(){
+      assert.equal(replacePrefix('my-test-1', 'my-', 'me-'), 'me-test-1');
+
+      assert.throws(function(){
+        replacePrefix('my-test-1', 'y-', 'e-');
+      });
+    });
 
 });
