@@ -158,6 +158,9 @@ function replicate(options){
       logger.log('    ' + lastOperation + '  ' + status);
       lastOperation = null;
     });
+    r.on('opError', msg=>{
+      logger.log('        ' + msg);
+    });
 
 
     logger.startLOP();
