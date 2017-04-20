@@ -387,6 +387,7 @@ describe('Replicator', function(){
       let r = new Replicator(host, 'nomatter');
       r.on('opStart', logPush);
       r.on('opProgress', logPush);
+      r.on('opCheckpoint', logPush);
       r.on('opEnd', logPush);
       return r._copyUsers(host + '/' + dbSample, host + '/' + dbSampleTarget)
         .then(function(){
@@ -447,6 +448,7 @@ describe('Replicator', function(){
 
         r.on('opStart', logPush);
         r.on('opProgress', logPush);
+        r.on('opCheckpoint', logPush);
         r.on('opEnd', logPush);
         // r.on('opError', logPush);
 
@@ -463,6 +465,16 @@ describe('Replicator', function(){
           });
       });
 
+
+      it('agentExt', function(){
+        let r = new Replicator(host, 'current-develop_ffa_');
+
+        return r.agentExt(host).then(result=>{
+          console.log(result);
+        });
+
+
+      });
 
 
 
