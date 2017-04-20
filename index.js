@@ -164,7 +164,7 @@ switch(options.operation){
     break;
 
   case 'agent_int':
-    // agentInt(options);
+    agentInt(options);
     break;
 
   default:
@@ -401,6 +401,22 @@ function agentExt(options){
   r.agentExt(options.target)
     .then(result=>{
       console.log('Records updated: \n' + prettyFormat(result, ['id', 'ok']) );
+    });
+}
+
+
+function agentInt(options){
+  options.target = options.target || options.src || options.replicator || HOST_DEFAULT;
+  options.replicator = options.target; // Actually, no matter in this case
+  assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+  printEnv(options);
+
+
+  let r = new Replicator(options.replicator, options.prefix);
+  _bindLogger(r);
+  r.agentInt(options.target)
+    .then(result=>{
+      console.log('\nDone!');
     });
 }
 

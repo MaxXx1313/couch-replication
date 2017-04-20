@@ -491,7 +491,56 @@ describe('Replicator', function(){
             rev: '5-f443debfa5c55e5576b5e64446601227' } ]*
       */
 
-          // assert.ok( result.db_name.endsWith('_db') )
+        });
+
+
+      });
+
+      it('agentInt', function(){
+
+        let logExpected = [
+          'Fetching backup',
+          'Process: current-develop_ffa_ext_task',
+          'Process: current-develop_ffa_private',
+          'Process: current-develop_ffa_public',
+          'Process: current-develop_ffa_query',
+          'Process: current-develop_ffa_agent',
+          'Process: current-develop_ffa_user_bb85ab47997b55815aa79c093407629f',
+          'Process: current-develop_ffa_user_bb85ab47997b55815aa79c093407629f_rw',
+          'Process: current-develop_ffa_user_bb85ab47997b55815aa79c0934076860',
+          'Process: current-develop_ffa_user_bb85ab47997b55815aa79c0934076860_rw',
+          'Process: current-develop_ffa_course_d4ad3939-7d15-4aec-9ede-ac298d0f54a4',
+          'Process: current-develop_ffa_int_task',
+          'Process: current-develop_ffa_user_bb85ab47997b55815aa79c0934076bbf',
+          'Process: current-develop_ffa_course_ce3132b6-b223-4d68-88bf-46f1c79f069c',
+          'Process: current-develop_ffa_user_bb85ab47997b55815aa79c0934076bbf_rw',
+          'Process: current-develop_ffa_course_12c35d76-aee2-424c-bb86-eba0f16982c5',
+          'Process: current-develop_ffa_course_f9851ac8-5879-4cbb-9fc7-b690c5b7310b',
+          'Save backup'
+        ];
+
+
+        let log = [];
+        function logPush(str){
+          // console.log(str);
+          log.push(str);
+        }
+
+
+        let r = new Replicator(host, 'current-develop_ffa_');
+        r.on('opCheckpoint', logPush);
+
+        return r.agentInt(host).then(result=>{
+          // console.log(result);
+          /*
+          { ok: true,
+            id: 'backup',
+            rev: '97-2601ff942158ea5404c9585cde5154d8' }
+          */
+          assert.ok(result.ok);
+          assert.ok(result.rev);
+          assert.equal(result.id, 'backup');
+          assert.deepEqual(log, logExpected);
         });
 
 
