@@ -2,6 +2,7 @@
 /* jshint esversion: 6 */
 const assert = require('assert');
 const commandLineArgs = require('command-line-args');
+const getUsage = require('command-line-usage');
 const prettyFormat      = require('./lib/cli-tools.js').prettyFormat;
 const prettyFormatArray = require('./lib/cli-tools.js').prettyFormatArray;
 const Replicator = require('./lib/replicator.js').Replicator;
@@ -14,22 +15,76 @@ const logger = new LopConsole();
 const HOST_DEFAULT = 'http://localhost:5984';
 
 const optionDefinitions = [
-  { name: 'operation', type: String, defaultOption:true }, // operation
-  { name: 'help',    alias: "h", type: Boolean },          // print help
-  { name: 'prefix',  alias: 'p', type: String },          // db prefix
-  { name: 'src',     alias: 's', type: String },          // replication source url
-  { name: 'target',  alias: 't', type: String },          // replication target url
-  { name: 'replicator',  alias: 'r', type: String },      // (optional) replicator host url. default is host
-  { name: 'newprefix',  type: String },                   // (optional) change prefix to this one
-  { name: 'after',  type: String },                        // (optional) resule replication since that name
-  { name: 'withusers',  type: Boolean }                   // (optional) replicate and copy user credentials
+  { name: 'operation', type: String, defaultOption:true,
+    description: 'main operation. One of: list, dblist, copy/replicate, copyusers, removeall'
+  },
+  { name: 'help',    alias: "h", type: Boolean, description: "print this help" },
+  { name: 'prefix',  alias: 'p', type: String,  description: 'db prefix' },
+  { name: 'src',     alias: 's', type: String,  description: 'replication source url' },
+  { name: 'target',  alias: 't', type: String,  description: 'replication target url' },
+  { name: 'replicator',  alias: 'r', type: String, description: 'replicator host url. default=source'},
+  { name: 'newprefix',  type: String,  description: '(optional) set new prefix for dbs while replicating'},
+  { name: 'after',      type: String,  description: '(optional) resume replication since that db name'},
+  { name: 'withusers',  type: Boolean, description: '(optional) replicate and copy user credentials'}
 ];
 
 const options = commandLineArgs(optionDefinitions);
 
 
 function usage(){
-  console.log('HELP: Look into thecode');
+  let usageText = getUsage([{
+    header: 'Usage',
+    content: './index.js <operation> -p [-s|t|r] <options>'
+  }, {
+    header: 'Description',
+    content: 'Perform bulk replication operations'
+  }, {
+    header: 'Options',
+    optionList: optionDefinitions
+  }, {
+    header: 'Operations',
+    content: [
+      'list      - list of active replications. require param -r',
+      'dblist    - list of databases. require param -s',
+      'copy      - same as replicate',
+      'replicate - replicate databases. require -s and -t',
+      'copyusers - replicate users. require -s and -t',
+      'removeall - remove ALL dbs! require -t',
+    ]
+  }, {
+    header: 'Examples:',
+    content: {
+      options: {
+        noTrim: true
+      },
+      data: [
+        {col:'Replicate dbs:'},
+        {col: "  node index replicate -p 'test1-' -s http://user:pass@172.16.16.84:5984 -t http://user:pass@172.16.16.84:5986"},
+        {col:''},
+
+        {col:'Replicate with users dbs:'},
+        {col: "  node index replicate -p 'test1-' -s http://user:pass@172.16.16.84:5984 -t http://user:pass@172.16.16.84:5986  --withusers --newprefix 'copy1-'"},
+        {col:''},
+
+        {col:'Copy users:'},
+        {col: "  node index copyusers -p 'test1-' -s http://user:pass@172.16.16.84:5984 -t http://user:pass@172.16.16.84:5986 --newprefix 'copy1-'"},
+        {col:''},
+
+        {col:'Db list:'},
+        {col: "  node index dblist -p 'test1-' -s http://user:pass@172.16.16.84:5984"},
+        {col:''},
+
+        {col:'List active replications'},
+        {col:"  node index list -p 'test1-' -r http://user:pass@172.16.16.84:5984"},
+        {col:''},
+
+        {col:'Delete all dbs in the scope'},
+        {col:"  node index removeall -p 'test1-' -t http://user:pass@172.16.16.84:5984"}
+
+      ]
+    }
+  }]);
+  console.log(usageText);
 }
 
 
