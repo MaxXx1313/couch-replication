@@ -256,6 +256,41 @@ describe('Replicator', function(){
     });
 
 
+    it('setDbUsers', function(){
+
+      let data = {
+        members: {
+          names: [ 'test-user-1' ],
+          roles: []
+        }
+      };
+
+      let dbSample = 'my-test-1';
+
+      return Replicator.setDbUsers(host, dbSample, data).then(data=>{
+        // console.log(data)
+        assert.ok(data.ok);
+      });
+    });
+
+
+    it('getDbUsers', function(){
+
+      let expected = {
+        members: {
+          names: [ 'test-user-1' ],
+          roles: []
+        }
+      };
+
+      let dbSample = 'my-test-1';
+
+      return Replicator.getDbUsers(host, dbSample).then(data=>{
+        assert.deepEqual(data, expected);
+      });
+    });
+
+
 });
 
 describe('replacePrefix', function(){
