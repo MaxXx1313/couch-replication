@@ -41,10 +41,19 @@ function printError(e){
 
 function printEnv(options){
   if(!options.silent){
-    console.log('  Replicator: ', options.replicator);
+    console.log('  Replicator: ', scrub(options.replicator) );
     console.log('      Prefix: ', options.prefix);
     console.log('   Operation: ', options.operation);
+    console.log('      Source: ', scrub(options.src) );
+    console.log('      Target: ', scrub(options.target) );
   }
+}
+
+function scrub(str) {
+  if (str) {
+    str = str.replace(/\/\/(.*)@/,"//XXXXXX:XXXXXX@");
+  }
+  return str;
 }
 
 ///////////////////////////
@@ -56,9 +65,7 @@ if(options.help || !options.operation){
   return;
 }
 
-printEnv(options);
-
-
+assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
 switch(options.operation){
   case 'list':
     operationList(options);
@@ -82,16 +89,15 @@ switch(options.operation){
 
 
 /**
- *
+ * List active operations on replicator host
  */
 function operationList(options){
-  let replicator = options.replicator || options.src || options.target || HOST_DEFAULT;
-  assert.ok(replicator,  'No value for: replicator. Use -r|--replicator to set it');
-  assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
-
+  options.replicator = options.replicator || options.src || options.target || HOST_DEFAULT;
+  assert.ok(options.replicator,  'No value for: replicator. Use -r|--replicator to set it');
+  printEnv(options);
 
   Promise.resolve().then(()=>{
-    let r = new Replicator(replicator, options.prefix);
+    let r = new Replicator(options.replicator, options.prefix);
     return r.replicationList();
   })
   .then(list=>{
@@ -100,16 +106,15 @@ function operationList(options){
 }
 
 /**
- *
+ * List dbs on source host
  */
 function dbList(options){
-  var source = options.src || options.replicator || options.target || HOST_DEFAULT;
-  assert.ok(source,  'No value for: source. Use -s|--src to set it');
-  assert.ok(options.prefix,  'No value for: prefix. Use -p|--prefix to set it');
-
+  options.src = options.src || options.replicator || options.target || HOST_DEFAULT;
+  assert.ok(options.src,  'No value for: source. Use -s|--src to set it');
+  printEnv(options);
 
   Promise.resolve().then(()=>{
-    let r = new Replicator(source, options.prefix);
+    let r = new Replicator(options.src, options.prefix);
     return r.dbList();
   })
   .then(list=>{
@@ -120,20 +125,22 @@ function dbList(options){
 
 
 /**
- *
+ * replicate from source to target by replicator agent on replicator
  */
 function replicate(options){
-  var replicator = options.replicator || options.src || HOST_DEFAULT;
-  var source = options.src || options.replicator || HOST_DEFAULT;
+  options.replicator = options.replicator || options.src || HOST_DEFAULT;
+  options.src = options.src || options.replicator || HOST_DEFAULT;
 
-  assert.ok(replicator,  'No value for: replicator. Use -r|--replicator to set it');
-  assert.ok(source,  'No value for: source. Use -s|--src to set it');
+  assert.ok(options.replicator,  'No value for: replicator. Use -r|--replicator to set it');
+  assert.ok(options.src,  'No value for: source. Use -s|--src to set it');
   assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+  printEnv(options);
 
 
   Promise.resolve().then(()=>{
-    let r = new Replicator(replicator, options.prefix);
+    let r = new Replicator(options.replicator, options.prefix);
 
+    // log progress
     let lastOperation = '...';
     r.on('opStart', op=>{
       lastOperation = '  ' + op;
@@ -153,7 +160,10 @@ function replicate(options){
 
 
     logger.startLOP();
-    return r.replicate(source, options.target, {newprefix: options.newprefix, after: options.after} )
+    return r.replicate(options.src, options.target, {
+      newprefix: options.newprefix,
+      after: options.after
+    })
     .then(()=>{
       logger.stopLOP();
       console.log('All done! Elapsed: %s ms', logger.elapsedLOP() );
@@ -165,17 +175,19 @@ function replicate(options){
 
 
 /**
- *
+ * remove all dbs on target
  */
 function removeAll(options){
-  var target = options.target || options.replicator || options.src || HOST_DEFAULT;
-
+  options.target = options.target || options.src || HOST_DEFAULT;
   assert.ok(target,  'No value for: target. Use -t|--target to set it');
+  printEnv(options);
+
+
   console.log('YOU HAVE 5 SECOND TO DISCARD REMOVING!');
   console.log('Press  Ctrl + C  to discard!');
 
   timeout(5000).then(()=>{
-    let r = new Replicator(target, options.prefix);
+    let r = new Replicator(options.target, options.prefix);
 
     r.on('opStart', op=>{
       process.stdout.write(' ' + op+ '...');
