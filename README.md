@@ -13,6 +13,11 @@ node index list -p 'current-develop_ffa_' -t http://admin:admin@172.16.16.84:598
 
 # databases list
 node index dblist -p 'current-develop_ffa_' -t http://admin:admin@172.16.16.84:5984
+
+
+# copy users
+node index copyusers -p 'current-develop_ffa_' -s http://admin:admin@172.16.16.84:5984 -t http://admin:admin@172.16.16.84:5986 --newprefix 'tets3-'
+
 ```
 
 ## TODO
