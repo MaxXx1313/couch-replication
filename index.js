@@ -118,7 +118,8 @@ function dbList(options){
     return r.dbList();
   })
   .then(list=>{
-    console.log('Databases (' + list.length + '):  \n' + prettyFormatArray(list) );
+    console.log('Databases:  \n' + prettyFormatArray(list) );
+    console.log('Total: ' + list.length );
   });
 }
 
