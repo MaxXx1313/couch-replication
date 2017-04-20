@@ -16,7 +16,7 @@ const HOST_DEFAULT = 'http://localhost:5984';
 
 const optionDefinitions = [
   { name: 'operation', type: String, defaultOption:true,
-    description: 'main operation. One of: list, dblist, copy/replicate, copyusers, removeall'
+    description: 'main operation. See below for details'
   },
   { name: 'help',    alias: "h", type: Boolean, description: "print this help" },
   { name: 'prefix',  alias: 'p', type: String,  description: 'db prefix' },
@@ -25,7 +25,9 @@ const optionDefinitions = [
   { name: 'replicator',  alias: 'r', type: String, description: 'replicator host url. default=source'},
   { name: 'newprefix',  type: String,  description: '(optional) set new prefix for dbs while replicating'},
   { name: 'after',      type: String,  description: '(optional) resume replication since that db name'},
-  { name: 'withusers',  type: Boolean, description: '(optional) replicate and copy user credentials'}
+  { name: 'withusers',  type: Boolean, description: '(optional) replicate and copy user credentials'},
+  { name: 'db',  alias: 'd', type: String,  description: 'specify database (for users command)' },
+  { name: 'user',  alias: 'u', type: String,  description: 'specify user id (for user command)' },
 ];
 
 const options = commandLineArgs(optionDefinitions);
@@ -46,6 +48,8 @@ function usage(){
     content: [
       'list      - list of active replications. require param -r',
       'dblist    - list of databases. require param -s',
+      'users     - list of users for db. require param -s, -d',
+      'user      - get user info. require param -s, -u',
       'copy      - same as replicate',
       'replicate - replicate databases. require -s and -t',
       'copyusers - replicate users. require -s and -t',
@@ -143,6 +147,14 @@ switch(options.operation){
 
   case 'removeall':
     removeAll(options);
+    break;
+
+  case 'user':
+    getUser(options);
+    break;
+
+  case 'users':
+    getUsers(options);
     break;
 
   default:
@@ -308,6 +320,46 @@ function _bindLogger(replicator){
     console.log( (hasProgress ? '\n   ' : '') + status);
   });
 }
+
+
+/**
+ * get users for specified db
+ */
+function getUsers(options){
+
+  options.target = options.target || options.src || options.replicator || HOST_DEFAULT;
+  assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+  assert.ok(options.db,  'No value for: db. Use -d|--db to set it');
+  printEnv(options);
+
+  Replicator.getDbUsers(options.target + '/' + options.db)
+    .then(userData=>{
+        let userList = userData.members && userData.members.names || [];
+        let adminList = userData.admins && userData.admins.names || [];
+        return {users: userList, admins: adminList};
+    })
+     .then(data=>{
+      console.log('Users: \n', data );
+    });
+}
+
+/**
+ * get users for specified db
+ */
+function getUser(options){
+
+  options.target = options.target || options.src || options.replicator || HOST_DEFAULT;
+  assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+  assert.ok(options.user,  'No value for: user. Use -u|--user to set it');
+  printEnv(options);
+
+  Replicator.getUser(options.target, options.user)
+     .then(data=>{
+      console.log('User: \n', data );
+    });
+}
+
+
 
 
 function timeout(ms){
