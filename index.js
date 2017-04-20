@@ -300,7 +300,7 @@ function _bindLogger(replicator){
   });
 
   replicator.on('opProgress', progress=>{
-    process.stdout.write('\n   ' + progress);
+    process.stdout.write('\n   ' + (progress || 'N/A') );
     hasProgress = true;
   });
   replicator.on('opEnd', status=>{
