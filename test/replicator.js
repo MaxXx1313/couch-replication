@@ -291,6 +291,76 @@ describe('Replicator', function(){
     });
 
 
+    it('getUser', function(){
+
+      let expected = {
+         "_id": "org.couchdb.user:bb85ab47997b55815aa79c093407629f",
+         // "_rev": "1-32e02c1f671710e053329b4c1dff7be7",
+         "password_scheme": "pbkdf2",
+         "iterations": 10,
+         "name": "bb85ab47997b55815aa79c093407629f",
+         "roles": [
+             "user"
+         ],
+         "status": "Approved",
+         "email": [
+             "user@irls"
+         ],
+         "type": "user",
+         "external": [
+         ],
+         "derived_key": "e6a50389fcc25d819f88c24ae9f01173adf921f1",
+         "salt": "2d50b70dbb1090506568f6b6e059383c"
+      };
+
+      let userSample = 'bb85ab47997b55815aa79c093407629f';
+
+      return Replicator.getUser(host, userSample).then(data=>{
+        // console.log(data);
+        assert.ok(data._rev);
+        delete data._rev;
+        assert.deepEqual(data, expected);
+      });
+    });
+
+    it('setUser', function(){
+
+      let data = {
+         "_id": "org.couchdb.user:bb85ab47997b55815aa79c093407629f",
+         "_rev": "1-32e02c1f671710e053329b4c1dff7be7",
+         "password_scheme": "pbkdf2",
+         "iterations": 10,
+         "name": "bb85ab47997b55815aa79c093407629f",
+         "roles": [
+             "user"
+         ],
+         "status": "Approved",
+         "email": [
+             "user@irls"
+         ],
+         "type": "user",
+         "external": [
+         ],
+         "derived_key": "e6a50389fcc25d819f88c24ae9f01173adf921f1",
+         "salt": "2d50b70dbb1090506568f6b6e059383c"
+      };
+
+      let userSample = 'bb85ab47997b55815aa79c093407629f';
+
+      return Replicator.getUser(host, userSample)
+        .then(user=>{
+          data._rev = user._rev;
+          return Replicator.setUser(host, userSample, data);
+        })
+        .then(data=>{
+          // console.log(data);
+          assert.ok(data.ok);
+          assert.equal(data.id, 'org.couchdb.user:' + userSample);
+          assert.ok(data.rev);
+        });
+    });
+
+
 });
 
 describe('replacePrefix', function(){
