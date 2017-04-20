@@ -214,37 +214,16 @@ function replicate(options){
 
   Promise.resolve().then(()=>{
     let r = new Replicator(options.replicator, options.prefix);
+    _bindLogger(r);
 
-    // log progress
-    let lastOperation = '...';
-    r.on('opStart', op=>{
-      lastOperation = '  ' + op;
-      // console.log('opStart', op);
-      logger.logLOP(lastOperation + '  ...');
-    });
-    r.on('opProgress', progress=>{
-      // console.log('opProgress', progress);
-      logger.logLOP(lastOperation + '  ' + progress +' %');
-    });
-    r.on('opEnd', status=>{
-      // console.log('opEnd', status);
-      // logger.logLOP('');
-      logger.log('    ' + lastOperation + '  ' + status);
-      lastOperation = null;
-    });
-    r.on('opError', msg=>{
-      logger.log('        ' + msg);
-    });
-
-
-    logger.startLOP();
+    // logger.startLOP();
     return r.replicate(options.src, options.target, {
       newprefix: options.newprefix,
       after: options.after,
       withusers: options.withusers
     })
     .then(()=>{
-      logger.stopLOP();
+      // logger.stopLOP();
       console.log('All done! Elapsed: %s ms', logger.elapsedLOP() );
     });
   });
@@ -315,10 +294,51 @@ function _bindLogger(replicator){
     process.stdout.write('\n   ' + (progress || 'N/A') );
     hasProgress = true;
   });
+  replicator.on('opCheckpoint', status=>{
+    process.stdout.write('\n   ' + status );
+    hasProgress = true;
+  });
+
   replicator.on('opEnd', status=>{
-    // console.log('opEnd', status);
     console.log( (hasProgress ? '\n   ' : '') + status);
   });
+  replicator.on('opError', msg=>{
+    console.log( (hasProgress ? '\n   ' : '') + msg);
+  });
+}
+
+
+/**
+ * @param {Replicator} replicator
+ */
+function _bindLongLogger(replicator){
+
+    // log progress
+    let lastOperation = '...';
+    replicator.on('opStart', op=>{
+      lastOperation = '  ' + op;
+      // console.log('opStart', op);
+      logger.logLOP(lastOperation + '  ...');
+    });
+    replicator.on('opProgress', progress=>{
+      // console.log('opProgress', progress);
+      logger.logLOP(lastOperation + '  ' + (progress || 'n/a')  +' %');
+    });
+    replicator.on('opCheckpoint', status=>{
+      // console.log('opCheckpoint', status);
+      logger.log('        ' + status);
+    });
+    replicator.on('opEnd', status=>{
+      // console.log('opEnd', status);
+      logger.log('    ' + lastOperation + '  ' + status);
+      logger.logLOP('');
+      lastOperation = null;
+    });
+    replicator.on('opError', msg=>{
+      // console.log('opError', msg);
+      logger.log('        ' + msg);
+    });
+
 }
 
 
