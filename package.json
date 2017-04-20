@@ -1,7 +1,7 @@
 {
   "name": "couch-replication",
   "version": "1.0.0",
-  "description": "",
+  "description": "Perform bulk replication operations",
   "main": "index.js",
   "scripts": {
     "test": "mocha",
