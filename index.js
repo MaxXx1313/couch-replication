@@ -214,6 +214,7 @@ function removeAll(options){
  */
 function copyUsers(options){
   options.src = options.src || options.replicator || HOST_DEFAULT;
+  options.replicator = options.replicator || options.src; // Actually, no matter in this case
 
   assert.ok(options.src,  'No value for: source. Use -s|--src to set it');
   assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
@@ -238,12 +239,18 @@ function copyUsers(options){
  * @param {Replicator} replicator
  */
 function _bindLogger(replicator){
-  r.on('opStart', op=>{
-    process.stdout.write(' ' + op+ '...');
+  let hasProgress = false;
+  replicator.on('opStart', op=>{
+    process.stdout.write(' ' + op+ '... ');
   });
-  r.on('opEnd', status=>{
+
+  replicator.on('opProgress', progress=>{
+    process.stdout.write('\n   ' + progress);
+    hasProgress = true;
+  });
+  replicator.on('opEnd', status=>{
     // console.log('opEnd', status);
-    console.log(status);
+    console.log( (hasProgress ? '\n   ' : '') + status);
   });
 }
 
