@@ -470,7 +470,28 @@ describe('Replicator', function(){
         let r = new Replicator(host, 'current-develop_ffa_');
 
         return r.agentExt(host).then(result=>{
-          console.log(result);
+          // console.log(result);
+
+          result.forEach(res=>{
+            assert.ok(res.ok);
+          });
+
+          /*
+           [ { ok: true,
+            id: 'Book',
+            rev: '6-7d2229b1d214ee918be73539a2da031b' },
+          { ok: true,
+            id: 'Collection',
+            rev: '2-1ee2e77033e7d8446b7e9b14d8a66c29' },
+          { ok: true,
+            id: 'StudyCourse',
+            rev: '2-ccc17ce1dfcec3b3d7c79e50feb60407' },
+          { ok: true,
+            id: 'UserProfile',
+            rev: '5-f443debfa5c55e5576b5e64446601227' } ]*
+      */
+
+          // assert.ok( result.db_name.endsWith('_db') )
         });
 
 
@@ -481,10 +502,14 @@ describe('Replicator', function(){
 
 });
 
-describe('replacePrefix', function(){
+
+
+
+
+describe('statuc methods', function(){
 
     // make sure to run after 'replicate continuous'
-    it('simple', function(){
+    it('replacePrefix', function(){
       assert.equal(replacePrefix('my-test-1', 'my-', 'me-'), 'me-test-1');
 
       assert.throws(function(){
@@ -492,12 +517,9 @@ describe('replacePrefix', function(){
       });
     });
 
-});
-
-describe('parseDbUrl', function(){
 
     // make sure to run after 'replicate continuous'
-    it('simple', function(){
+    it('parseDbUrl', function(){
       let testData = [
         [
           'http://admin:admin@172.16.16.84:5984/current-develop_ffa_ext_task/',
@@ -522,12 +544,10 @@ describe('parseDbUrl', function(){
 
     });
 
-});
 
-describe('__matchUrl', function(){
 
     // make sure to run after 'replicate continuous'
-    it('simple', function(){
+    it('__matchUrl', function(){
 
       let r = new Replicator(host, 'my-test-');
 
@@ -545,6 +565,22 @@ describe('__matchUrl', function(){
         assert.equal(r.__matchUrl(data[0], data[1]), data[2]);
       });
 
+    });
+
+
+    it('getByType', function(){
+
+
+
+      return Replicator.getByType(host + '/current-develop_ffa_ext_task', 'counter')
+        .then(docs=>{
+          // console.log(docs);
+          assert.ok(docs.length > 0, 'let\'s have at least one doc in db');
+          docs.forEach(doc=>{
+            assert.equal(doc.type, 'counter');
+            assert.ok(typeof doc.value != "undefined");
+          });
+        });
     });
 
 });

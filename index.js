@@ -50,6 +50,8 @@ function usage(){
       'dblist    - list of databases. require param -s',
       'users     - list of users for db. require param -s, -d',
       'user      - get user info. require param -s, -u',
+      'agent_int - update last-seq for agent int database, require param -t',
+      'agent_ext - update last-seq for agent ext database, require param -t',
       'copy      - same as replicate',
       'replicate - replicate databases. require -s and -t',
       'copyusers - replicate users. require -s and -t',
@@ -155,6 +157,14 @@ switch(options.operation){
 
   case 'users':
     getUsers(options);
+    break;
+
+  case 'agent_ext':
+    agentExt(options);
+    break;
+
+  case 'agent_int':
+    // agentInt(options);
     break;
 
   default:
@@ -380,6 +390,19 @@ function getUser(options){
 }
 
 
+function agentExt(options){
+  options.target = options.target || options.src || options.replicator || HOST_DEFAULT;
+  options.replicator = options.target; // Actually, no matter in this case
+  assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+  printEnv(options);
+
+
+  let r = new Replicator(options.replicator, options.prefix);
+  r.agentExt(options.target)
+    .then(result=>{
+      console.log('Records updated: \n' + prettyFormat(result, ['id', 'ok']) );
+    });
+}
 
 
 function timeout(ms){

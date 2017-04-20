@@ -18,6 +18,11 @@ node index dblist -p 'current-develop_ffa_' -t http://admin:admin@172.16.16.84:5
 # copy users
 node index copyusers -p 'current-develop_ffa_' -s http://admin:admin@172.16.16.84:5984 -t http://admin:admin@172.16.16.84:5986 --newprefix 'tets3-'
 
+# run agent task for EXT/INT db
+node index agent_ext -p 'current-develop_ffa_' -t http://admin:admin@172.16.16.84:5984
+
+node index agent_int -p 'current-develop_ffa_' -t http://admin:admin@172.16.16.84:5984
+
 ```
 
 ## TODO
