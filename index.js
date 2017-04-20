@@ -77,8 +77,13 @@ switch(options.operation){
     dbList(options);
     break;
 
+  case 'copy':
   case 'replicate':
     replicate(options);
+    break;
+
+  case 'copyusers':
+    copyUsers(options);
     break;
 
   case 'removeall':
@@ -212,6 +217,58 @@ function removeAll(options){
 }
 
 
+/**
+ * Copy users, related to dbs
+ */
+function copyUsers(options){
+  options.src = options.src || options.replicator || HOST_DEFAULT;
+
+  assert.ok(options.src,  'No value for: source. Use -s|--src to set it');
+  assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
+  printEnv(options);
+
+  Promise.resolve().then(()=>{
+    let r = new Replicator(options.replicator, options.prefix);
+
+    // log progress
+    let lastOperation = '...';
+    r.on('opStart', op=>{
+      lastOperation = '  ' + op;
+      // console.log('opStart', op);
+      logger.logLOP(lastOperation + '  ...');
+    });
+    r.on('opProgress', progress=>{
+      // console.log('opProgress', progress);
+      logger.logLOP(lastOperation + '  ' + progress +' %');
+    });
+    r.on('opEnd', status=>{
+      // console.log('opEnd', status);
+      // logger.logLOP('');
+      logger.log('    ' + lastOperation + '  ' + status);
+      lastOperation = null;
+    });
+    r.on('opError', msg=>{
+      logger.log('        ' + msg);
+    });
+
+
+    logger.startLOP();
+    return r.replicate(options.src, options.target, {
+      newprefix: options.newprefix,
+      after: options.after,
+      withusers: options.withusers
+    })
+    .then(()=>{
+      logger.stopLOP();
+      console.log('All done! Elapsed: %s ms', logger.elapsedLOP() );
+    });
+  });
+
+}
+
+
 function timeout(ms){
   return new Promise(resolve=>{ setTimeout(resolve, ms);});
 }
+
+
