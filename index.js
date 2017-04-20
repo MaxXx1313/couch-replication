@@ -22,7 +22,7 @@ const optionDefinitions = [
   { name: 'prefix',  alias: 'p', type: String,  description: 'db prefix' },
   { name: 'src',     alias: 's', type: String,  description: 'replication source url' },
   { name: 'target',  alias: 't', type: String,  description: 'replication target url' },
-  { name: 'replicator',  alias: 'r', type: String, description: 'replicator host url. default=source'},
+  { name: 'replicator',  alias: 'r', type: String, description: 'replicator host url. default=src'},
   { name: 'newprefix',  type: String,  description: '(optional) set new prefix for dbs while replicating'},
   { name: 'after',      type: String,  description: '(optional) resume replication since that db name'},
   { name: 'withusers',  type: Boolean, description: '(optional) replicate and copy user credentials'},
@@ -41,9 +41,6 @@ function usage(){
     header: 'Description',
     content: 'Perform bulk replication operations'
   }, {
-    header: 'Options',
-    optionList: optionDefinitions
-  }, {
     header: 'Operations',
     content: [
       'list      - list of active replications. require param -r',
@@ -58,7 +55,10 @@ function usage(){
       'removeall - remove ALL dbs! require -t',
     ]
   }, {
-    header: 'Examples:',
+    header: 'Options',
+    optionList: optionDefinitions
+  }, {
+    header: 'Examples',
     content: {
       options: {
         noTrim: true
