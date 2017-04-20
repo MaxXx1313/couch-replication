@@ -21,7 +21,8 @@ const optionDefinitions = [
   { name: 'target',  alias: 't', type: String },          // replication target url
   { name: 'replicator',  alias: 'r', type: String },      // (optional) replicator host url. default is host
   { name: 'newprefix',  type: String },                   // (optional) change prefix to this one
-  { name: 'after',  type: String }                        // (optional) resule replication since that name
+  { name: 'after',  type: String },                        // (optional) resule replication since that name
+  { name: 'withusers',  type: Boolean }                   // (optional) replicate and copy user credentials
 ];
 
 const options = commandLineArgs(optionDefinitions);
@@ -46,6 +47,7 @@ function printEnv(options){
     console.log('   Operation: ', options.operation);
     console.log('      Source: ', scrub(options.src) );
     console.log('      Target: ', scrub(options.target) );
+    console.log('');
   }
 }
 
@@ -166,7 +168,8 @@ function replicate(options){
     logger.startLOP();
     return r.replicate(options.src, options.target, {
       newprefix: options.newprefix,
-      after: options.after
+      after: options.after,
+      withusers: options.withusers
     })
     .then(()=>{
       logger.stopLOP();
