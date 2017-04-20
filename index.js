@@ -200,15 +200,7 @@ function removeAll(options){
 
   timeout(5000).then(()=>{
     let r = new Replicator(options.target, options.prefix);
-
-    r.on('opStart', op=>{
-      process.stdout.write(' ' + op+ '...');
-    });
-    r.on('opEnd', status=>{
-      // console.log('opEnd', status);
-      console.log(status);
-    });
-
+    _bindLogger(r);
     return r.removeAll();
   })
   .then(list=>{
@@ -229,41 +221,30 @@ function copyUsers(options){
 
   Promise.resolve().then(()=>{
     let r = new Replicator(options.replicator, options.prefix);
+    _bindLogger(r);
 
-    // log progress
-    let lastOperation = '...';
-    r.on('opStart', op=>{
-      lastOperation = '  ' + op;
-      // console.log('opStart', op);
-      logger.logLOP(lastOperation + '  ...');
-    });
-    r.on('opProgress', progress=>{
-      // console.log('opProgress', progress);
-      logger.logLOP(lastOperation + '  ' + progress +' %');
-    });
-    r.on('opEnd', status=>{
-      // console.log('opEnd', status);
-      // logger.logLOP('');
-      logger.log('    ' + lastOperation + '  ' + status);
-      lastOperation = null;
-    });
-    r.on('opError', msg=>{
-      logger.log('        ' + msg);
-    });
-
-
-    logger.startLOP();
-    return r.replicate(options.src, options.target, {
+    return r.copyUsers(options.src, options.target, {
       newprefix: options.newprefix,
-      after: options.after,
-      withusers: options.withusers
+      after: options.after
     })
     .then(()=>{
-      logger.stopLOP();
-      console.log('All done! Elapsed: %s ms', logger.elapsedLOP() );
+      console.log('All done!');
     });
   });
+}
 
+
+/**
+ * @param {Replicator} replicator
+ */
+function _bindLogger(replicator){
+  r.on('opStart', op=>{
+    process.stdout.write(' ' + op+ '...');
+  });
+  r.on('opEnd', status=>{
+    // console.log('opEnd', status);
+    console.log(status);
+  });
 }
 
 

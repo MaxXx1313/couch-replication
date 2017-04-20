@@ -420,6 +420,51 @@ describe('Replicator', function(){
     });
 
 
+    it('copyUsers', function(){
+
+        let r = new Replicator(host, 'my-test-');
+
+        let expected = [
+          'my-replica-1',
+          'my-replica-2',
+          'my-replica-4',
+        ];
+
+
+        let log = [];
+        function logPush(str){
+          // console.log(str);
+          log.push(str);
+        }
+
+        let logExpected = [
+            "Fetch db list",  "Done",
+            "Transfer users", "test-user-1", "Done",
+            "Transfer users", "test-user-1", "Done",
+            "Transfer users", "Done"
+        ];
+
+
+        r.on('opStart', logPush);
+        r.on('opProgress', logPush);
+        r.on('opEnd', logPush);
+        // r.on('opError', logPush);
+
+
+        return r.copyUsers(host, host/*, {newprefix: 'my-replica-'}*/)
+          .then(()=>{
+
+            r.off('opStart', logPush);
+            r.off('opProgress', logPush);
+            r.off('opEnd', logPush);
+            // r.off('opError', logPush);
+
+            assert.deepEqual(log, logExpected);
+          });
+      });
+
+
+
 });
 
 describe('replacePrefix', function(){
