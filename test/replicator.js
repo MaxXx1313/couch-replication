@@ -333,7 +333,7 @@ describe('Replicator', function(){
 
       let data = {
          "_id": "org.couchdb.user:bb85ab47997b55815aa79c093407629f",
-         "_rev": "1-32e02c1f671710e053329b4c1dff7be7",
+         // "_rev": "1-32e02c1f671710e053329b4c1dff7be7",
          "password_scheme": "pbkdf2",
          "iterations": 10,
          "name": "bb85ab47997b55815aa79c093407629f",
@@ -356,7 +356,7 @@ describe('Replicator', function(){
       return Replicator.getUser(host, userSample)
         .then(user=>{
           data._rev = user._rev;
-          return Replicator.setUser(host, userSample, data);
+          return Replicator.setUser(host, data);
         })
         .then(data=>{
           // console.log(data);
@@ -395,6 +395,27 @@ describe('Replicator', function(){
           r.off('opEnd', logPush);
 
           assert.deepEqual(log, logExpected);
+        });
+
+    });
+
+    it('_copyUser - conflict', function(){
+
+      // let userSample = 'test-user-1';
+      let userSample = 'bb85ab47997b55815aa79c093407629f';
+
+      let r = new Replicator(host, 'nomatter');
+      return Promise.all([
+         // 90% that we face conflict here
+          r._copyUser(userSample, host, host),
+          r._copyUser(userSample, host, host)
+        ])
+        .then(function(result){
+          result.forEach(data=>{
+            assert.ok(data.ok);
+            assert.equal(data.id, 'org.couchdb.user:' + userSample);
+            assert.ok(data.rev);
+          });
         });
 
     });
