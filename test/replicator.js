@@ -378,7 +378,7 @@ describe('Replicator', function(){
       }
 
       let logExpected = [
-         "Transfer users",
+         "Transfer users from my-test-1",
            "test-user-1",
          "Done"
       ];
@@ -439,9 +439,9 @@ describe('Replicator', function(){
 
         let logExpected = [
             "Fetch db list",  "Done",
-            "Transfer users", "test-user-1", "Done",
-            "Transfer users", "test-user-1", "Done",
-            "Transfer users", "Done"
+            "Transfer users from my-test-1", "test-user-1", "Done",
+            "Transfer users from my-test-2", "test-user-1", "Done",
+            "Transfer users from my-test-4", "Done"
         ];
 
 
