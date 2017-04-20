@@ -25,7 +25,3 @@ node index agent_int -p 'current-develop_ffa_' -t http://admin:admin@172.16.16.8
 
 ```
 
-## TODO
-
-* replication progress
-* remove all (oh my god!)
