@@ -2,6 +2,7 @@
 const assert = require('assert');
 const Replicator = require('../lib/replicator.js').Replicator;
 const replacePrefix = require('../lib/replicator.js').replacePrefix;
+const parseDbUrl = require('../lib/replicator.js').parseDbUrl;
 const nano = require('../lib/nano-promise.js');
 
 
@@ -77,8 +78,13 @@ describe('Replicator', function(){
         let logExpected = [
           "Fetch db list",    "Done",
           "Replicate my-test-1", "Success",
+          "Transfer users",      "Done",
+
           "Replicate my-test-2", "Success",
-          "Replicate my-test-4", "Success"
+          "Transfer users",      "Done",
+
+          "Replicate my-test-4", "Success",
+          "Transfer users",      "Done",
         ];
 
 
@@ -267,7 +273,7 @@ describe('Replicator', function(){
 
       let dbSample = 'my-test-1';
 
-      return Replicator.setDbUsers(host, dbSample, data).then(data=>{
+      return Replicator.setDbUsers(host + '/' + dbSample, data).then(data=>{
         // console.log(data)
         assert.ok(data.ok);
       });
@@ -285,7 +291,7 @@ describe('Replicator', function(){
 
       let dbSample = 'my-test-1';
 
-      return Replicator.getDbUsers(host, dbSample).then(data=>{
+      return Replicator.getDbUsers(host+'/'+dbSample).then(data=>{
         assert.deepEqual(data, expected);
       });
     });
@@ -361,6 +367,39 @@ describe('Replicator', function(){
     });
 
 
+    it('_copyUsers', function(){
+
+      let dbSample = 'my-test-1';
+      let dbSampleTarget = 'my-test-2';
+
+      let log = [];
+      function logPush(str){
+        log.push(str);
+      }
+
+      let logExpected = [
+         "Transfer users",
+           "test-user-1",
+         "Done"
+      ];
+
+
+      let r = new Replicator(host, 'nomatter');
+      r.on('opStart', logPush);
+      r.on('opProgress', logPush);
+      r.on('opEnd', logPush);
+      return r._copyUsers(host + '/' + dbSample, host + '/' + dbSampleTarget)
+        .then(function(){
+          r.off('opStart', logPush);
+          r.off('opProgress', logPush);
+          r.off('opEnd', logPush);
+
+          assert.deepEqual(log, logExpected);
+        });
+
+    });
+
+
 });
 
 describe('replacePrefix', function(){
@@ -372,6 +411,36 @@ describe('replacePrefix', function(){
       assert.throws(function(){
         replacePrefix('my-test-1', 'y-', 'e-');
       });
+    });
+
+});
+
+describe('parseDbUrl', function(){
+
+    // make sure to run after 'replicate continuous'
+    it('simple', function(){
+      let testData = [
+        [
+          'http://admin:admin@172.16.16.84:5984/current-develop_ffa_ext_task/',
+          {
+            host: 'http://admin:admin@172.16.16.84:5984',
+            db: 'current-develop_ffa_ext_task',
+          }
+        ],
+        [
+          'http://admin:admin@172.16.16.84:5984/current-develop_ffa_ext_task',
+          {
+            host: 'http://admin:admin@172.16.16.84:5984',
+            db: 'current-develop_ffa_ext_task',
+          }
+        ]
+
+      ];
+
+      testData.forEach(data=>{
+        assert.deepEqual(parseDbUrl(data[0]), data[1]);
+      });
+
     });
 
 });
