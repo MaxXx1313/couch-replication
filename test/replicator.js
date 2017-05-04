@@ -16,6 +16,7 @@ let dbList = [
 
 
 let host = 'http://admin:admin@172.16.16.84:5984';
+let host2 = 'http://admin:admin@172.16.16.84:5986';
 before(function(){
   // create some dbs
   return Promise.all(dbList.map(dbName=>{
@@ -617,11 +618,22 @@ describe('statuc methods', function(){
     });
 
 
-    it('getByType', function(){
-
-
+    it('getByType (_temp_view)', function(){
 
       return Replicator.getByType(host + '/current-develop_ffa_ext_task', 'counter')
+        .then(docs=>{
+          // console.log(docs);
+          assert.ok(docs.length > 0, 'let\'s have at least one doc in db');
+          docs.forEach(doc=>{
+            assert.equal(doc.type, 'counter');
+            assert.ok(typeof doc.value != "undefined");
+          });
+        });
+    });
+
+     it('getByType (mango)', function(){
+
+      return Replicator.getByType(host2 + '/current-develop_ffa_ext_task', 'counter')
         .then(docs=>{
           // console.log(docs);
           assert.ok(docs.length > 0, 'let\'s have at least one doc in db');
