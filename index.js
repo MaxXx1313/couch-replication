@@ -392,13 +392,15 @@ function getUser(options){
 
 function agentExt(options){
   options.target = options.target || options.src || options.replicator || HOST_DEFAULT;
-  options.replicator = options.target; // Actually, no matter in this case
+  options.replicator = options.replicator || options.src || options.target;
   assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
   printEnv(options);
 
 
   let r = new Replicator(options.replicator, options.prefix);
-  r.agentExt(options.target)
+  r.agentExt(options.target, {
+    newprefix: options.newprefix
+  })
     .then(result=>{
       console.log('Records updated: \n' + prettyFormat(result, ['id', 'ok']) );
     });
@@ -407,14 +409,16 @@ function agentExt(options){
 
 function agentInt(options){
   options.target = options.target || options.src || options.replicator || HOST_DEFAULT;
-  options.replicator = options.target; // Actually, no matter in this case
+  options.replicator = options.replicator || options.src || options.target;
   assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
   printEnv(options);
 
 
   let r = new Replicator(options.replicator, options.prefix);
   _bindLogger(r);
-  r.agentInt(options.target)
+  r.agentInt(options.target, {
+    newprefix: options.newprefix
+  })
     .then(result=>{
       console.log('\nDone!');
     });
