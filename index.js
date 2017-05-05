@@ -5,6 +5,7 @@ const commandLineArgs = require('command-line-args');
 const getUsage = require('command-line-usage');
 const prettyFormat      = require('./lib/cli-tools.js').prettyFormat;
 const prettyFormatArray = require('./lib/cli-tools.js').prettyFormatArray;
+const tic = require('./lib/cli-tools.js').tic;
 const Replicator = require('./lib/replicator.js').Replicator;
 
 const singleLog = require('single-line-log').stdout;
@@ -221,7 +222,7 @@ function replicate(options){
   assert.ok(options.target,  'No value for: target. Use -t|--target to set it');
   printEnv(options);
 
-
+  tic();
   Promise.resolve().then(()=>{
     let r = new Replicator(options.replicator, options.prefix);
     _bindLogger(r);
@@ -234,7 +235,7 @@ function replicate(options){
     })
     .then(()=>{
       // logger.stopLOP();
-      console.log('All done! Elapsed: %s ms', logger.elapsedLOP() );
+      console.log('All done! Elapsed: %s ms', tic() /*logger.elapsedLOP()*/ );
     });
   });
 }
